@@ -123,6 +123,16 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
     repoUrl: "",
     tags: "",
   });
+  const [addingTaskColumn, setAddingTaskColumn] = useState<KanbanColumn | null>(null);
+  const [addForm, setAddForm] = useState({
+    title: "",
+    description: "",
+    priority: "medium" as Priority,
+    progress: "0",
+    tags: "",
+    projectUrl: "",
+    repoUrl: "",
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -260,37 +270,27 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
     }
   }
 
-  async function addTask(column: KanbanColumn) {
-    const title = window.prompt("Task title");
-    if (!title) {
-      return;
-    }
-    const description = window.prompt("Task description", "") ?? "";
-    const priorityPrompt =
-      (window.prompt(
-        "Priority (low | medium | high | critical)",
-        "medium",
-      ) ?? "medium") as Priority;
-    const progressPrompt = Number(window.prompt("Progress 0-100", "0") ?? "0");
-    const tagsPrompt = window.prompt("Comma-separated tags", "") ?? "";
-    const projectUrl = window.prompt("Project URL", "") ?? "";
-    const repoUrl = window.prompt("Repo URL", "") ?? "";
+  function addTask(column: KanbanColumn) {
+    setAddingTaskColumn(column);
+    setAddForm({ title: "", description: "", priority: "medium", progress: "0", tags: "", projectUrl: "", repoUrl: "" });
+  }
 
+  async function handleAddSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!addingTaskColumn) return;
+    const progress = Number(addForm.progress);
     const payload = {
-      columnId: column.id,
-      title,
-      description,
-      priority: priorityPrompt,
-      progress: Number.isNaN(progressPrompt) ? 0 : progressPrompt,
-      tags: tagsPrompt
-        .split(",")
-        .map((value) => value.trim())
-        .filter(Boolean),
-      projectUrl,
-      repoUrl,
+      columnId: addingTaskColumn.id,
+      title: addForm.title,
+      description: addForm.description,
+      priority: addForm.priority,
+      progress: Number.isNaN(progress) ? 0 : Math.min(100, Math.max(0, progress)),
+      tags: addForm.tags.split(",").map((v) => v.trim()).filter(Boolean),
+      projectUrl: addForm.projectUrl,
+      repoUrl: addForm.repoUrl,
       isVisible: true,
     };
-
+    setAddingTaskColumn(null);
     try {
       const response = await requestJson<{ task: KanbanTask }>("/api/admin/tasks", {
         method: "POST",
@@ -298,7 +298,7 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
       });
       setColumns((current) =>
         current.map((item) =>
-          item.id === column.id
+          item.id === payload.columnId
             ? { ...item, tasks: normalizeTaskPositions([...item.tasks, response.task]) }
             : item,
         ),
@@ -688,6 +688,119 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
           </div>
         </footer>
       </main>
+
+      {addingTaskColumn && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setAddingTaskColumn(null); }}
+        >
+          <div className="glass-modal w-full max-w-md p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-base font-semibold">Add Task</h2>
+              <button
+                type="button"
+                onClick={() => setAddingTaskColumn(null)}
+                className="rounded-full p-1.5 text-[var(--kanban-muted)] hover:bg-[var(--kanban-hover)]"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <form onSubmit={handleAddSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Title</label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={addForm.title}
+                  onChange={(e) => setAddForm((f) => ({ ...f, title: e.target.value }))}
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Description</label>
+                <textarea
+                  rows={3}
+                  value={addForm.description}
+                  onChange={(e) => setAddForm((f) => ({ ...f, description: e.target.value }))}
+                  className="w-full resize-none rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 py-2 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Priority</label>
+                  <select
+                    value={addForm.priority}
+                    onChange={(e) => setAddForm((f) => ({ ...f, priority: e.target.value as Priority }))}
+                    className="h-10 w-full rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Progress (0–100)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={addForm.progress}
+                    onChange={(e) => setAddForm((f) => ({ ...f, progress: e.target.value }))}
+                    className="h-10 w-full rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Tags (comma-separated)</label>
+                <input
+                  type="text"
+                  value={addForm.tags}
+                  onChange={(e) => setAddForm((f) => ({ ...f, tags: e.target.value }))}
+                  placeholder="react, typescript, api"
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Project URL</label>
+                <input
+                  type="url"
+                  value={addForm.projectUrl}
+                  onChange={(e) => setAddForm((f) => ({ ...f, projectUrl: e.target.value }))}
+                  placeholder="https://..."
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Repo URL</label>
+                <input
+                  type="url"
+                  value={addForm.repoUrl}
+                  onChange={(e) => setAddForm((f) => ({ ...f, repoUrl: e.target.value }))}
+                  placeholder="https://github.com/..."
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setAddingTaskColumn(null)}
+                  className="h-9 rounded-full border border-[var(--kanban-border)] px-4 text-sm font-medium transition hover:bg-[var(--kanban-hover)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="h-9 rounded-full bg-[var(--kanban-accent)] px-5 text-sm font-semibold text-white transition hover:brightness-95"
+                >
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {editingTask && (
         <div
