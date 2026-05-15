@@ -16,6 +16,9 @@ services:
       AGENT_API_KEY: ${AGENT_API_KEY}
     ports:
       - "3000:3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.app.loadbalancer.server.port=3000"
     volumes:
       - kanban_data:/data
     networks:
