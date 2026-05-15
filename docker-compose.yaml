@@ -18,6 +18,8 @@ services:
       - "3000:3000"
     volumes:
       - kanban_data:/data
+    networks:
+      - coolify
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/board > /dev/null 2>&1 || exit 1"]
       interval: 30s
@@ -28,3 +30,7 @@ services:
 volumes:
   kanban_data:
     driver: local
+
+networks:
+  coolify:
+    external: true
