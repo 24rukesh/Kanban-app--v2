@@ -3,7 +3,7 @@ WORKDIR /app
 # better-sqlite3 compiles native C++ bindings — requires build tools
 RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install --frozen-lockfile=false
 
 FROM node:22-alpine AS builder
 WORKDIR /app
