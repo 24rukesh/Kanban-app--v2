@@ -630,6 +630,7 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
         <section className="overflow-x-auto pb-6">
           {isAdmin ? (
             <DndContext
+              id="kanban-board"
               sensors={sensors}
               onDragOver={handleDragOver}
               onDragEnd={handleDragEnd}
