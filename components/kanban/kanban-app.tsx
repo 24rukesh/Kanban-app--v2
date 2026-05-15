@@ -26,6 +26,7 @@ import {
   Plus,
   ShieldCheck,
   Trash2,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
@@ -114,6 +115,14 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [editingTask, setEditingTask] = useState<KanbanTask | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    projectUrl: "",
+    repoUrl: "",
+    tags: "",
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -315,32 +324,37 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
     }
   }
 
-  async function editTask(task: KanbanTask) {
-    const title = window.prompt("Task title", task.title);
-    if (!title) {
-      return;
-    }
-    const description = window.prompt("Description", task.description) ?? "";
-    const projectUrl = window.prompt("Project URL", task.projectUrl) ?? "";
-    const repoUrl = window.prompt("Repo URL", task.repoUrl) ?? "";
-    const tagsPrompt = window.prompt("Comma-separated tags", task.tags.join(", ")) ?? "";
+  function editTask(task: KanbanTask) {
+    setEditingTask(task);
+    setEditForm({
+      title: task.title,
+      description: task.description,
+      projectUrl: task.projectUrl,
+      repoUrl: task.repoUrl,
+      tags: task.tags.join(", "),
+    });
+  }
+
+  async function handleEditSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingTask) return;
     const payload = {
-      title,
-      description,
-      projectUrl,
-      repoUrl,
-      tags: tagsPrompt
+      title: editForm.title,
+      description: editForm.description,
+      projectUrl: editForm.projectUrl,
+      repoUrl: editForm.repoUrl,
+      tags: editForm.tags
         .split(",")
-        .map((value) => value.trim())
+        .map((v) => v.trim())
         .filter(Boolean),
     };
-
     const previous = columns;
     setColumns((current) =>
-      replaceTask(current, task.id, (item) => ({ ...item, ...payload })),
+      replaceTask(current, editingTask.id, (item) => ({ ...item, ...payload })),
     );
+    setEditingTask(null);
     try {
-      await requestJson<{ task: KanbanTask }>(`/api/admin/tasks/${task.id}`, {
+      await requestJson<{ task: KanbanTask }>(`/api/admin/tasks/${editingTask.id}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       });
@@ -673,6 +687,92 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
           </div>
         </footer>
       </main>
+
+      {editingTask && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setEditingTask(null); }}
+        >
+          <div className="w-full max-w-md rounded-[var(--kanban-radius)] border border-[var(--kanban-border)] bg-white p-6 shadow-xl">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-base font-semibold">Edit Task</h2>
+              <button
+                type="button"
+                onClick={() => setEditingTask(null)}
+                className="rounded-full p-1.5 text-[var(--kanban-muted)] hover:bg-slate-100"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <form onSubmit={handleEditSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Title</label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.title}
+                  onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] px-3 text-sm outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Description</label>
+                <textarea
+                  rows={3}
+                  value={editForm.description}
+                  onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
+                  className="w-full resize-none rounded-lg border border-[var(--kanban-border)] px-3 py-2 text-sm outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Tags (comma-separated)</label>
+                <input
+                  type="text"
+                  value={editForm.tags}
+                  onChange={(e) => setEditForm((f) => ({ ...f, tags: e.target.value }))}
+                  placeholder="react, typescript, api"
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] px-3 text-sm outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Project URL</label>
+                <input
+                  type="url"
+                  value={editForm.projectUrl}
+                  onChange={(e) => setEditForm((f) => ({ ...f, projectUrl: e.target.value }))}
+                  placeholder="https://..."
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] px-3 text-sm outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--kanban-muted)]">Repo URL</label>
+                <input
+                  type="url"
+                  value={editForm.repoUrl}
+                  onChange={(e) => setEditForm((f) => ({ ...f, repoUrl: e.target.value }))}
+                  placeholder="https://github.com/..."
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] px-3 text-sm outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setEditingTask(null)}
+                  className="h-9 rounded-full border border-[var(--kanban-border)] px-4 text-sm font-medium transition hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="h-9 rounded-full bg-[var(--kanban-accent)] px-5 text-sm font-semibold text-white transition hover:brightness-95"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
