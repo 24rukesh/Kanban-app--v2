@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+:root {
+  /* === Portfolio exact tokens (rukesh.in) === */
+  --background:      #1C1C1E;
+  --foreground:      #FFFFFF;
+
+  /* Surfaces */
+  --kanban-bg:       #1C1C1E;
+  --kanban-surface:  #2C2C2E;
+  --kanban-tertiary: #3A3A3C;
+  --kanban-separator:#48484A;
+
+  /* Text */
+  --kanban-text:     #FFFFFF;
+  --kanban-secondary:#EBEBF5;
+  --kanban-muted:    rgba(235, 235, 245, 0.6);
+  --kanban-faint:    rgba(235, 235, 245, 0.3);
+
+  /* Borders */
+  --kanban-border:   rgba(255, 255, 255, 0.08);
+  --kanban-border-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Hover */
+  --kanban-hover:    rgba(99, 99, 102, 0.3);
+
+  /* Accent */
+  --kanban-accent:   #0A84FF;
+
+  /* Radius — matches portfolio glass-radius */
+  --kanban-radius:   16px;
+  --kanban-radius-sm:12px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans, "Nunito", "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
+  --font-mono: "SF Mono", "Fira Code", Consolas, monospace;
+}
+
+body {
+  background: var(--kanban-bg);
+  color: var(--foreground);
+  font-family: var(--font-sans, "Nunito", "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* === Glass utilities (exact match to portfolio) === */
+
+/* Primary glass card — columns */
+.glass-card {
+  background: rgba(44, 44, 46, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--kanban-radius);
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.05) inset,
+    0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Subtle glass — task cards */
+.glass-subtle {
+  background: rgba(58, 58, 60, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--kanban-radius-sm);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Modal glass */
+.glass-modal {
+  background: rgba(44, 44, 46, 0.85);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--kanban-radius);
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.08) inset,
+    0 24px 64px rgba(0, 0, 0, 0.6);
+}
+
+/* Selection */
+::selection {
+  background: rgba(10, 132, 255, 0.3);
+  color: #ffffff;
+}
+
+/* Scrollbar — matches portfolio */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

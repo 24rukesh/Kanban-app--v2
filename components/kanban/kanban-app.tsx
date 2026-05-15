@@ -46,10 +46,10 @@ type KanbanAppProps = {
 };
 
 const priorityTone: Record<Priority, string> = {
-  low: "bg-emerald-100 text-emerald-800",
-  medium: "bg-amber-100 text-amber-900",
-  high: "bg-orange-100 text-orange-900",
-  critical: "bg-rose-100 text-rose-900",
+  low: "bg-[#30D158]/20 text-[#30D158]",
+  medium: "bg-[#FFD60A]/20 text-[#FFD60A]",
+  high: "bg-[#FF9F0A]/20 text-[#FF9F0A]",
+  critical: "bg-[#FF453A]/20 text-[#FF453A]",
 };
 
 const COLUMN_PREFIX = "column::";
@@ -545,12 +545,12 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
   return (
     <div className="min-h-screen bg-[var(--kanban-bg)] text-[var(--kanban-text)]">
       <main className="flex w-full flex-col px-4 py-8 sm:px-6 lg:px-10">
-        <header className="mb-6 flex flex-col gap-4 border-b border-[var(--kanban-border)] pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <header className="mb-6 flex flex-col gap-4 border-b border-[var(--kanban-separator)] pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--kanban-muted)]">
               Rukesh Dasari / Portfolio Kanban
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight">{settings.title}</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-[var(--kanban-secondary)]">{settings.title}</h1>
             <p className="max-w-2xl text-sm text-[var(--kanban-muted)]">
               {settings.description || "Current projects and live builds in motion."}
             </p>
@@ -589,7 +589,7 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
         </header>
 
         {mode === "admin" && !isAdmin && (
-          <section className="mb-6 rounded-[var(--kanban-radius)] border border-[var(--kanban-border)] bg-[var(--kanban-surface)] p-5 shadow-[0_6px_20px_rgba(15,23,42,0.05)]">
+          <section className="glass-card mb-6 p-5">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
               <ShieldCheck className="size-4 text-[var(--kanban-accent)]" />
               Unlock Admin Mode
@@ -603,7 +603,7 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
                 value={unlockKey}
                 onChange={(event) => setUnlockKey(event.target.value)}
                 placeholder="Admin access key"
-                className="h-11 flex-1 rounded-full border border-[var(--kanban-border)] bg-white px-4 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                className="h-11 flex-1 rounded-full border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-4 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
               />
               <button
                 type="submit"
@@ -617,12 +617,12 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
         )}
 
         {statusMessage && (
-          <p className="mb-4 rounded-[var(--kanban-radius)] border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
+          <p className="mb-4 rounded-[var(--kanban-radius)] border border-[#30D158]/30 bg-[#30D158]/10 px-4 py-2 text-sm text-[#30D158]">
             {statusMessage}
           </p>
         )}
         {errorMessage && (
-          <p className="mb-4 rounded-[var(--kanban-radius)] border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800">
+          <p className="mb-4 rounded-[var(--kanban-radius)] border border-[#FF453A]/30 bg-[#FF453A]/10 px-4 py-2 text-sm text-[#FF453A]">
             {errorMessage}
           </p>
         )}
@@ -665,7 +665,7 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
           )}
         </section>
 
-        <footer className="mt-2 flex flex-col items-start justify-between gap-3 border-t border-[var(--kanban-border)] pt-6 text-sm text-[var(--kanban-muted)] sm:flex-row sm:items-center">
+        <footer className="mt-2 flex flex-col items-start justify-between gap-3 border-t border-[var(--kanban-separator)] pt-6 text-sm text-[var(--kanban-muted)] sm:flex-row sm:items-center">
           <p>Built for public transparency with private admin control.</p>
           <div className="flex items-center gap-4">
             <a
@@ -693,13 +693,13 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setEditingTask(null); }}
         >
-          <div className="w-full max-w-md rounded-[var(--kanban-radius)] border border-[var(--kanban-border)] bg-white p-6 shadow-xl">
+          <div className="glass-modal w-full max-w-md p-6">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-base font-semibold">Edit Task</h2>
               <button
                 type="button"
                 onClick={() => setEditingTask(null)}
-                className="rounded-full p-1.5 text-[var(--kanban-muted)] hover:bg-slate-100"
+                className="rounded-full p-1.5 text-[var(--kanban-muted)] hover:bg-[var(--kanban-hover)]"
               >
                 <X className="size-4" />
               </button>
@@ -712,7 +712,7 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
                   required
                   value={editForm.title}
                   onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] px-3 text-sm outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
                 />
               </div>
               <div>
@@ -721,7 +721,7 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
                   rows={3}
                   value={editForm.description}
                   onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-                  className="w-full resize-none rounded-lg border border-[var(--kanban-border)] px-3 py-2 text-sm outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                  className="w-full resize-none rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 py-2 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
                 />
               </div>
               <div>
@@ -731,7 +731,7 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
                   value={editForm.tags}
                   onChange={(e) => setEditForm((f) => ({ ...f, tags: e.target.value }))}
                   placeholder="react, typescript, api"
-                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] px-3 text-sm outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
                 />
               </div>
               <div>
@@ -741,7 +741,7 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
                   value={editForm.projectUrl}
                   onChange={(e) => setEditForm((f) => ({ ...f, projectUrl: e.target.value }))}
                   placeholder="https://..."
-                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] px-3 text-sm outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
                 />
               </div>
               <div>
@@ -751,14 +751,14 @@ export function KanbanApp({ initialBoard, initialAdmin, mode }: KanbanAppProps) 
                   value={editForm.repoUrl}
                   onChange={(e) => setEditForm((f) => ({ ...f, repoUrl: e.target.value }))}
                   placeholder="https://github.com/..."
-                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] px-3 text-sm outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+                  className="h-10 w-full rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-3 text-sm text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setEditingTask(null)}
-                  className="h-9 rounded-full border border-[var(--kanban-border)] px-4 text-sm font-medium transition hover:bg-slate-50"
+                  className="h-9 rounded-full border border-[var(--kanban-border)] px-4 text-sm font-medium transition hover:bg-[var(--kanban-hover)]"
                 >
                   Cancel
                 </button>
@@ -818,15 +818,15 @@ function SortableColumn({
         transition,
       }}
       className={clsx(
-        "w-full sm:w-[320px] shrink-0 rounded-[var(--kanban-radius)] border border-[var(--kanban-border)] bg-[var(--kanban-surface)] p-4 shadow-[0_6px_20px_rgba(15,23,42,0.05)]",
-        isDragging && "opacity-80",
+        "glass-card w-full sm:w-[320px] shrink-0 p-4",
+        isDragging && "opacity-60",
       )}
     >
       <header className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="rounded-full p-1 text-[var(--kanban-muted)] hover:bg-slate-100"
+            className="rounded-full p-1 text-[var(--kanban-muted)] hover:bg-[var(--kanban-hover)]"
             title="Drag column"
             {...attributes}
             {...listeners}
@@ -844,7 +844,7 @@ function SortableColumn({
             type="button"
             onClick={() => onAddTask(column)}
             title="Add task"
-            className="rounded-full p-1.5 text-[var(--kanban-muted)] transition hover:bg-slate-100 hover:text-[var(--kanban-text)]"
+            className="rounded-full p-1.5 text-[var(--kanban-muted)] transition hover:bg-[var(--kanban-hover)] hover:text-[var(--kanban-text)]"
           >
             <Plus className="size-4" />
           </button>
@@ -852,7 +852,7 @@ function SortableColumn({
             type="button"
             onClick={() => onRename(column)}
             title="Rename column"
-            className="rounded-full p-1.5 text-[var(--kanban-muted)] transition hover:bg-slate-100 hover:text-[var(--kanban-text)]"
+            className="rounded-full p-1.5 text-[var(--kanban-muted)] transition hover:bg-[var(--kanban-hover)] hover:text-[var(--kanban-text)]"
           >
             <Pencil className="size-4" />
           </button>
@@ -860,7 +860,7 @@ function SortableColumn({
             type="button"
             onClick={() => onToggleVisibility(column)}
             title={column.isVisible ? "Hide column" : "Show column"}
-            className="rounded-full p-1.5 text-[var(--kanban-muted)] transition hover:bg-slate-100 hover:text-[var(--kanban-text)]"
+            className="rounded-full p-1.5 text-[var(--kanban-muted)] transition hover:bg-[var(--kanban-hover)] hover:text-[var(--kanban-text)]"
           >
             {column.isVisible ? (
               <Eye className="size-4" />
@@ -872,7 +872,7 @@ function SortableColumn({
             type="button"
             onClick={() => onRemove(column)}
             title="Delete column"
-            className="rounded-full p-1.5 text-rose-500 transition hover:bg-rose-50"
+            className="rounded-full p-1.5 text-[#FF453A] transition hover:bg-[#FF453A]/10"
           >
             <Trash2 className="size-4" />
           </button>
@@ -895,7 +895,7 @@ function SortableColumn({
             />
           ))}
           {column.tasks.length === 0 && (
-            <div className="rounded-[var(--kanban-radius)] border border-dashed border-[var(--kanban-border)] px-3 py-4 text-center text-sm text-[var(--kanban-muted)]">
+            <div className="rounded-[var(--kanban-radius-sm)] border border-dashed border-[var(--kanban-border)] px-3 py-4 text-center text-sm text-[var(--kanban-muted)]">
               Drag tasks here or add a new card.
             </div>
           )}
@@ -907,7 +907,7 @@ function SortableColumn({
 
 function StaticColumn({ column }: { column: KanbanColumn }) {
   return (
-    <article className="w-full sm:w-[320px] shrink-0 rounded-[var(--kanban-radius)] border border-[var(--kanban-border)] bg-[var(--kanban-surface)] p-4 shadow-[0_6px_20px_rgba(15,23,42,0.05)]">
+    <article className="glass-card w-full sm:w-[320px] shrink-0 p-4">
       <header className="mb-3 flex items-center gap-2">
         <span
           className="inline-block size-2.5 rounded-full"
@@ -919,7 +919,7 @@ function StaticColumn({ column }: { column: KanbanColumn }) {
         {column.tasks.length > 0 ? (
           column.tasks.map((task) => <TaskCard key={task.id} task={task} isAdmin={false} />)
         ) : (
-          <div className="rounded-[var(--kanban-radius)] border border-dashed border-[var(--kanban-border)] px-3 py-4 text-center text-sm text-[var(--kanban-muted)]">
+          <div className="rounded-[var(--kanban-radius-sm)] border border-dashed border-[var(--kanban-border)] px-3 py-4 text-center text-sm text-[var(--kanban-muted)]">
             No visible tasks yet.
           </div>
         )}
@@ -995,7 +995,7 @@ function TaskCard({
   onArchiveTask,
 }: TaskCardProps) {
   return (
-    <article className="rounded-[var(--kanban-radius)] border border-[var(--kanban-border)] bg-white p-3 shadow-[0_3px_10px_rgba(15,23,42,0.05)]">
+    <article className="glass-subtle p-3">
       <div className="mb-2 flex items-center justify-between gap-2">
         <span
           className={clsx(
@@ -1008,7 +1008,7 @@ function TaskCard({
         {isAdmin && (
           <button
             type="button"
-            className="rounded-full p-1 text-[var(--kanban-muted)] hover:bg-slate-100"
+            className="rounded-full p-1 text-[var(--kanban-muted)] hover:bg-[var(--kanban-hover)]"
             title="Drag task"
             {...(dragAttributes ?? {})}
             {...(dragListeners ?? {})}
@@ -1028,7 +1028,7 @@ function TaskCard({
           {task.tags.map((tag) => (
             <span
               key={`${task.id}-${tag}`}
-              className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700"
+              className="rounded-full bg-[var(--kanban-hover)] px-2 py-0.5 text-[11px] font-medium text-[var(--kanban-muted)]"
             >
               {tag}
             </span>
@@ -1040,7 +1040,7 @@ function TaskCard({
         <span>Progress</span>
         <span>{task.progress}%</span>
       </div>
-      <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
+      <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-[var(--kanban-hover)]">
         <div
           className="h-full rounded-full bg-[var(--kanban-accent)]"
           style={{ width: `${task.progress}%` }}
@@ -1073,7 +1073,7 @@ function TaskCard({
       )}
 
       {(task.externalRef || task.agentId) && (
-        <div className="mb-3 rounded-md bg-slate-50 px-2 py-1 text-[11px] text-slate-600">
+        <div className="mb-3 rounded-md bg-[var(--kanban-hover)] px-2 py-1 text-[11px] text-[var(--kanban-muted)]">
           {task.externalRef && <span>ref: {task.externalRef}</span>}
           {task.externalRef && task.agentId && <span> · </span>}
           {task.agentId && <span>agent: {task.agentId}</span>}
@@ -1083,7 +1083,7 @@ function TaskCard({
       {isAdmin && onPatchTask && onEditTask && onArchiveTask && (
         <div className="grid grid-cols-2 gap-2 border-t border-[var(--kanban-border)] pt-3">
           <select
-            className="h-9 rounded-lg border border-[var(--kanban-border)] bg-white px-2 text-xs font-medium capitalize outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+            className="h-9 rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-2 text-xs font-medium capitalize text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
             value={task.priority}
             onChange={(event) =>
               void onPatchTask(task, { priority: event.target.value as Priority })
@@ -1104,18 +1104,18 @@ function TaskCard({
                 progress: Number(event.target.value),
               })
             }
-            className="h-9 rounded-lg border border-[var(--kanban-border)] px-2 text-xs outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
+            className="h-9 rounded-lg border border-[var(--kanban-border)] bg-[var(--kanban-tertiary)] px-2 text-xs text-[var(--kanban-text)] outline-none ring-[var(--kanban-accent)] transition focus:ring-2"
           />
           <button
             type="button"
-            className="h-9 rounded-lg border border-[var(--kanban-border)] text-xs font-semibold transition hover:bg-slate-50"
+            className="h-9 rounded-lg border border-[var(--kanban-border)] text-xs font-semibold transition hover:bg-[var(--kanban-hover)]"
             onClick={() => onEditTask(task)}
           >
             Edit
           </button>
           <button
             type="button"
-            className="h-9 rounded-lg border border-rose-200 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
+            className="h-9 rounded-lg border border-[#FF453A]/30 text-xs font-semibold text-[#FF453A] transition hover:bg-[#FF453A]/10"
             onClick={() => onArchiveTask(task)}
           >
             Archive
