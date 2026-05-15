@@ -5,26 +5,31 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: portfolio-kanban:latest
     restart: unless-stopped
     environment:
+      # Runtime (baked into Dockerfile — do not change)
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
-      PORT: 3000
+      PORT: "3000"
       DATABASE_URL: file:/data/kanban.sqlite
-      ADMIN_ACCESS_KEY: ${ADMIN_ACCESS_KEY}
-      SESSION_SECRET: ${SESSION_SECRET}
-      AGENT_API_KEY: ${AGENT_API_KEY}
-    volumes:
-      - kanban_data:/data
+
+      # ── Fill these in Coolify → Environment Variables ──
+      ADMIN_ACCESS_KEY: ${ADMIN_ACCESS_KEY}      # Secret key for /admin login (min 5 chars)
+      SESSION_SECRET: ${SESSION_SECRET}          # Long random string for JWT signing (min 16 chars)
+      AGENT_API_KEY: ${AGENT_API_KEY}            # API key for agent/automation access
+
     ports:
       - "3000:3000"
+
+    volumes:
+      - kanban_data:/data                        # Persistent SQLite database
+
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/board > /dev/null 2>&1 || exit 1"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 30s
 
 volumes:
   kanban_data:
